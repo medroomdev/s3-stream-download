@@ -16,6 +16,7 @@ module.exports = S3StreamDownload;
  */
 
 function S3StreamDownload (s3, s3Params, options) {
+    options = Object.assign({}, options);
     var downloader = new Downloader(s3, s3Params, options);
-    return new DownloadStream(downloader);
+    return new DownloadStream(downloader, options.onLoad, options.onPart, options.onError);
 }
