@@ -63,6 +63,7 @@ __Arguments__
 ## People
 
 [Raphael Rosa](https://github.com/RaphaelRosa) from [MedRoom](http://www.medroom.com.br)
+
 based on the package created by [Chris Kinsman](https://github.com/chriskinsman) from [PushSpring](http://www.pushspring.com)
 
 ## License
