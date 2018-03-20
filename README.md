@@ -1,17 +1,13 @@
 # s3-stream-download
 
-  [![shippable Build][shippable-image]][shippable-url]
-  [![NPM Version][npm-image]][npm-url]
-  [![NPM Downloads][downloads-image]][downloads-url]
-
-Multipart streaming download from S3
+Multipart streaming download from S3 with progress watch
 
 ## Features
 
 ## Installation
 
 ``` bash
-  $ npm install s3-stream-download --save
+  $ npm i git+https://github.com/medroomdev/s3-stream-download.git --save
 ```
 
 ## Usage
@@ -21,14 +17,26 @@ var AWS = require('aws-sdk');
 var S3StreamDownload = require('./index');
 var fs = require('fs');
 
-var s3 = new AWS.S3();
+var s3 = new AWS.S3({
+    apiVersion: '2006-03-01',
+    region: '<REGION>',
+    signatureVersion: 'v4',
+    s3DisableBodySigning: false
+});
 
-var s3StreamDownload = new S3StreamDownload(s3, {Bucket: '<BUCKET>', Key:'<KEY>'});
+let download = new s3StreamDownload(s3, { Bucket: '<BUCKET>', Key: '<KEY>' }, { downloadChunkSize:  1024 * 1024, concurrentChunks: 15, 
+    onLoad: (totalSize, chunkSize) => {
+        // called after totalSize and chunkSize of file is calculated
+    }, 
+    onPart: () => {
+        // called after each part is downloaded
+    }
+});
 
-s3StreamDownload.pipe(fs.createWriteStream('<FILENAME>'));
+download.pipe(window.require('fs').createWriteStream(path.join(app.getAppPath(), '<FILEPATH>')));
 
-s3StreamDownload.on('end', function() {
-    process.exit(0);
+download.on('end', () => {
+    console.log("finished");
 });
 ```
 
@@ -47,20 +55,19 @@ __Arguments__
     - `downloadChunkSize` - Size of each chunk in bytes.  Defaults to 5MB.
     - `concurrentChunks` - Number of chunks to download concurrently. Defaults to 5.
     - `retries` - How many times a failed chunk should be retried before failing the entire download. Retries will exponentially backoff to allow for recovery.  Defaults to 5.
+    - `onLoad` - Callback for when the information of the object is retrieved from s3.
+    - `onPart` - Callback for when a part is downloaded.
 
 
 
 ## People
 
-The author is [Chris Kinsman](https://github.com/chriskinsman) from [PushSpring](http://www.pushspring.com)
+[Raphael Rosa](https://github.com/RaphaelRosa) from [MedRoom](http://www.medroom.com.br)
+based on the package created by [Chris Kinsman](https://github.com/chriskinsman) from [PushSpring](http://www.pushspring.com)
 
 ## License
 
   [MIT](LICENSE)
 
-[npm-image]: https://img.shields.io/npm/v/s3-stream-download.svg?style=flat
-[npm-url]: https://npmjs.org/package/s3-stream-download
-[downloads-image]: https://img.shields.io/npm/dm/s3-stream-download.svg?style=flat
-[downloads-url]: https://npmjs.org/package/s3-stream-download
 [shippable-image]: https://api.shippable.com/projects/57bfbd4c016a370e00eb8907/badge?branch=master
 [shippable-url]: https://app.shippable.com/projects/57bfbd4c016a370e00eb8907
